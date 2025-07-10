@@ -1,0 +1,146 @@
+import { Common, Renderer } from "@freelensapp/extensions";
+import { withErrorPage } from "../components/error-page";
+import { ArgoRollout, ArgoRolloutApi } from "../k8s/argo-rollout/argo-rollout";
+
+const {
+  Component: { MenuItem },
+} = Renderer;
+
+export interface ArgoRolloutMenuItemProps extends Common.Types.KubeObjectMenuItemProps<ArgoRollout> {
+  extension: Renderer.LensExtension;
+  api: ArgoRolloutApi;
+}
+
+export const ArgoRolloutMenuItem = (props: ArgoRolloutMenuItemProps) =>
+  withErrorPage(props, () => {
+    const { object, api } = props;
+    if (!object) return <></>;
+
+    const phase = object.status?.phase;
+
+    const actions: JSX.Element[] = [];
+
+    const handleAbort = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const patch: Partial<ArgoRollout> = { spec: { paused: false }, status: { abort: true } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    const handlePromote = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const patch: Partial<ArgoRollout> = { spec: { paused: false }, status: { promoteFull: false } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    const handlePromoteFull = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const patch: Partial<ArgoRollout> = { spec: { paused: false }, status: { promoteFull: true } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    const handlePause = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const patch: Partial<ArgoRollout> = { spec: { paused: true } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    const handleRetry = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const patch: Partial<ArgoRollout> = { status: { abort: false } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    const handleRestart = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const restartAt = new Date().toISOString();
+      const patch: Partial<ArgoRollout> = { spec: { restartAt } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    const handleResume = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const patch: Partial<ArgoRollout> = { spec: { paused: false } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    if (phase === "Progressing" || phase === "Paused") {
+      actions.push(
+        <MenuItem onClick={handleAbort} key="abort" icon={{ material: "cancel" }}>
+          <span className="title">Abort</span>
+        </MenuItem>,
+        <MenuItem onClick={handlePromote} key="promote" icon={{ material: "keyboard_arrow_up" }}>
+          <span className="title">Promote</span>
+        </MenuItem>,
+        <MenuItem onClick={handlePromoteFull} key="promote-full" icon={{ material: "keyboard_double_arrow_up" }}>
+          <span className="title">Promote Full</span>
+        </MenuItem>,
+      );
+    }
+    if (phase === "Paused") {
+      actions.push(
+        <MenuItem onClick={handleResume} key="resume" icon={{ material: "play_arrow" }}>
+          <span className="title">Resume</span>
+        </MenuItem>,
+      );
+    }
+    if (phase === "Progressing") {
+      actions.push(
+        <MenuItem onClick={handlePause} key="pause" icon={{ material: "pause" }}>
+          <span className="title">Pause</span>
+        </MenuItem>,
+      );
+    }
+
+    if (phase === "Degraded") {
+      actions.push(
+        <MenuItem onClick={handleRetry} key="retry" icon={{ material: "refresh" }}>
+          <span className="title">Retry</span>
+        </MenuItem>,
+      );
+    }
+
+    if (phase === "Healthy") {
+      actions.push(
+        <MenuItem onClick={handleRestart} key="restart" icon={{ material: "restart_alt" }}>
+          <span className="title">Restart</span>
+        </MenuItem>,
+      );
+    }
+
+    return <>{actions}</>;
+  });
