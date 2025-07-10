@@ -9,16 +9,17 @@ const {
 export const ArgoRolloutsSettings = observer(() => {
   const preferences: ArgoRolloutsPreferencesStore =
     ArgoRolloutsPreferencesStore.getInstanceOrCreate<ArgoRolloutsPreferencesStore>();
+  const clusterId = window.location.pathname.split("/")[2];
   return (
     <section>
       <SubTitle title="Argo Rollouts Dashboard URL" />
       <Input
-        value={preferences.dashboardUrl}
-        onChange={(value: string) => (preferences.dashboardUrl = value)}
+        value={preferences.getDashboardUrl(clusterId)}
+        onChange={(value: string) => {preferences.setDashboardUrl(clusterId, value);}}
         placeholder="http(s)://<address>"
-        validators={preferences.dashboardUrl ? InputValidators.isUrl : undefined}
+        validators={preferences.getDashboardUrl(clusterId) ? InputValidators.isUrl : undefined}
       />
-      <small className="hint">Specify the URL for the Argo Rollouts Dashboard.</small>
+      <small className="hint">Specify the base URL for the Argo Rollouts Dashboard.</small>
     </section>
   );
 });

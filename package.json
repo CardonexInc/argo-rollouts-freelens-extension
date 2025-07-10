@@ -1,6 +1,6 @@
 {
   "name": "@cardonexinc/freelens-argo-rollouts-extension",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Argo Rollouts extension for Freelens",
   "repository": {
     "type": "git",

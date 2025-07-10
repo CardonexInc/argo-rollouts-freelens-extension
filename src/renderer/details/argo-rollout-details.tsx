@@ -21,10 +21,11 @@ export const ArgoRolloutDetails = observer((props: ArgoRolloutDetailsProps) => {
   const [preferencesStore, _setPreferencesStore] = useState<ArgoRolloutsPreferencesStore>(
     ArgoRolloutsPreferencesStore.getInstanceOrCreate<ArgoRolloutsPreferencesStore>(),
   );
+  const clusterId = window.location.hostname.split(".")[0];
   const { object: argoRollout } = props;
   return withErrorPage(props, () => {
     const podsStore = Renderer.K8sApi.apiManager.getStore("/api/v1/pods")!;
-    const baseUrl = preferencesStore.dashboardUrl || "";
+    const baseUrl = preferencesStore.getDashboardUrl(clusterId);
     console.log("[ARGO-ROLLOUTS-DRAWER] baseUrl", baseUrl);
 
     return (

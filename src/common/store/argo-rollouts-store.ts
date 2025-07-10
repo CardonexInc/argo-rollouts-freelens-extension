@@ -2,35 +2,40 @@ import { Common } from "@freelensapp/extensions";
 import { makeObservable, observable, toJS } from "mobx";
 
 export interface ArgoRolloutsPreferencesModel {
-  dashboardUrl: string;
+  dashboardUrls: string;
 }
 
 export class ArgoRolloutsPreferencesStore extends Common.Store.ExtensionStore<ArgoRolloutsPreferencesModel> {
+  setDashboardUrl(clusterId: string, value: string) {
+    let dashboardUrls = JSON.parse(this.dashboardUrls);
+    dashboardUrls[clusterId] = value;
+    this.dashboardUrls = JSON.stringify(dashboardUrls);
+  }
+  getDashboardUrl(clusterId: string): string {
+    const dashboardUrls = JSON.parse(this.dashboardUrls);
+    return dashboardUrls[clusterId] || "";
+  }
   // Persistent
-  @observable accessor dashboardUrl: string = "";
+  @observable accessor dashboardUrls: string = "{}";
 
   constructor() {
     super({
       configName: "argo-rollouts-preferences-store",
       defaults: {
-        dashboardUrl: "",
+        dashboardUrls: "{}",
       },
     });
-    console.log("[ARGO-ROLLOUTS-PREFERENCES-STORE] constructor");
     makeObservable(this);
   }
 
-  fromStore = ({ dashboardUrl }: ArgoRolloutsPreferencesModel): void => {
-    console.log(`[ARGO-ROLLOUTS-PREFERENCES-STORE] set ${dashboardUrl}`);
-
-    this.dashboardUrl = dashboardUrl;
+  fromStore = (model: ArgoRolloutsPreferencesModel): void => {
+    this.dashboardUrls = model.dashboardUrls;
   };
-
+  
   toJSON = (): ArgoRolloutsPreferencesModel => {
     const value: ArgoRolloutsPreferencesModel = {
-      dashboardUrl: this.dashboardUrl,
+      dashboardUrls: this.dashboardUrls,
     };
-    console.log(`[ARGO-ROLLOUTS-PREFERENCES-STORE] get ${value.dashboardUrl}`);
     return toJS(value);
   };
 }
