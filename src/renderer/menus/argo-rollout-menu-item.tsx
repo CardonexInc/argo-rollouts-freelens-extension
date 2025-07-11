@@ -18,8 +18,6 @@ export const ArgoRolloutMenuItem = (props: ArgoRolloutMenuItemProps) =>
 
     const phase = object.status?.phase;
 
-    const actions: JSX.Element[] = [];
-
     const handleAbort = async () => {
       if (!api) {
         console.error("API is not defined in props.");
@@ -49,6 +47,17 @@ export const ArgoRolloutMenuItem = (props: ArgoRolloutMenuItemProps) =>
       }
 
       const patch: Partial<ArgoRollout> = { spec: { paused: false }, status: { promoteFull: true } };
+      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
+      await api.patch(resourceDescriptor, patch, "merge");
+    };
+
+    const handleResume = async () => {
+      if (!api) {
+        console.error("API is not defined in props.");
+        return;
+      }
+
+      const patch: Partial<ArgoRollout> = { spec: { paused: false } };
       const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
       await api.patch(resourceDescriptor, patch, "merge");
     };
@@ -87,60 +96,29 @@ export const ArgoRolloutMenuItem = (props: ArgoRolloutMenuItemProps) =>
       await api.patch(resourceDescriptor, patch, "merge");
     };
 
-    const handleResume = async () => {
-      if (!api) {
-        console.error("API is not defined in props.");
-        return;
-      }
-
-      const patch: Partial<ArgoRollout> = { spec: { paused: false } };
-      const resourceDescriptor = { name: object.metadata.name, namespace: object.metadata.namespace };
-      await api.patch(resourceDescriptor, patch, "merge");
-    };
-
-    if (phase === "Progressing" || phase === "Paused") {
-      actions.push(
-        <MenuItem onClick={handleAbort} key="abort" icon={{ material: "cancel" }}>
-          <span className="title">Abort</span>
-        </MenuItem>,
-        <MenuItem onClick={handlePromote} key="promote" icon={{ material: "keyboard_arrow_up" }}>
-          <span className="title">Promote</span>
-        </MenuItem>,
-        <MenuItem onClick={handlePromoteFull} key="promote-full" icon={{ material: "keyboard_double_arrow_up" }}>
-          <span className="title">Promote Full</span>
-        </MenuItem>,
-      );
-    }
-    if (phase === "Paused") {
-      actions.push(
-        <MenuItem onClick={handleResume} key="resume" icon={{ material: "play_arrow" }}>
-          <span className="title">Resume</span>
-        </MenuItem>,
-      );
-    }
-    if (phase === "Progressing") {
-      actions.push(
-        <MenuItem onClick={handlePause} key="pause" icon={{ material: "pause" }}>
-          <span className="title">Pause</span>
-        </MenuItem>,
-      );
-    }
-
-    if (phase === "Degraded") {
-      actions.push(
-        <MenuItem onClick={handleRetry} key="retry" icon={{ material: "refresh" }}>
-          <span className="title">Retry</span>
-        </MenuItem>,
-      );
-    }
-
-    if (phase === "Healthy") {
-      actions.push(
-        <MenuItem onClick={handleRestart} key="restart" icon={{ material: "restart_alt" }}>
-          <span className="title">Restart</span>
-        </MenuItem>,
-      );
-    }
+    const actions: JSX.Element[] = [
+      <MenuItem onClick={handleAbort} key="abort" icon={{ material: "cancel" }} disabled={!(phase === "Progressing" || phase === "Paused")}>
+        <span className="title">Abort</span>
+      </MenuItem>,
+      <MenuItem onClick={handlePromote} key="promote" icon={{ material: "keyboard_arrow_up" }} disabled={!(phase === "Progressing" || phase === "Paused")}>
+        <span className="title">Promote</span>
+      </MenuItem>,
+      <MenuItem onClick={handlePromoteFull} key="promote-full" icon={{ material: "keyboard_double_arrow_up" }} disabled={!(phase === "Progressing" || phase === "Paused")}>
+        <span className="title">Promote Full</span>
+      </MenuItem>,
+      <MenuItem onClick={handleResume} key="resume" icon={{ material: "play_arrow" }} disabled={!(phase === "Paused")}>
+        <span className="title">Resume</span>
+      </MenuItem>,
+      <MenuItem onClick={handlePause} key="pause" icon={{ material: "pause" }} disabled={!(phase === "Progressing")}>
+        <span className="title">Pause</span>
+      </MenuItem>,
+      <MenuItem onClick={handleRetry} key="retry" icon={{ material: "refresh" }} disabled={!(phase === "Degraded")}>
+        <span className="title">Retry</span>
+      </MenuItem>,
+      <MenuItem onClick={handleRestart} key="restart" icon={{ material: "restart_alt" }} disabled={!(phase === "Healthy")}>
+        <span className="title">Restart</span>
+      </MenuItem>,
+    ];
 
     return <>{actions}</>;
   });
