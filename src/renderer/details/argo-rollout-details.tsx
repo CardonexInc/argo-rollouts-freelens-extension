@@ -35,6 +35,14 @@ export const ArgoRolloutDetails = observer((props: ArgoRolloutDetailsProps) => {
             {argoRollout.metadata.annotations["rollout.argoproj.io/revision"] || "N/A"}
           </DrawerItem>
         )}
+        {argoRollout.status?.currentPodHash && (
+          <DrawerItem name="Current Pod Hash">
+            {argoRollout.status.currentPodHash || "N/A"}
+          </DrawerItem>
+        )}
+        {argoRollout.status?.phase && (
+          <DrawerItem name="Phase">{argoRollout.status.phase || "N/A"}</DrawerItem>
+        )}
         {baseUrl && (
           <DrawerItem name="Rollouts Dashboard">
             <a
