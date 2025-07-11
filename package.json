@@ -8,6 +8,7 @@
     "directory": "."
   },
   "license": "MIT",
+  "private": false,
   "main": "out/main/main.js",
   "renderer": "out/renderer/renderer.js",
   "files": [
