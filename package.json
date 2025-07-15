@@ -1,10 +1,10 @@
 {
   "name": "@cardonexinc/freelens-argo-rollouts-extension",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Argo Rollouts extension for Freelens",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cardonexinc/freelens-argo-rollouts-extension.git",
+    "url": "git+https://github.com/CardonexInc/argo-rollouts-freelens-extension.git",
     "directory": "."
   },
   "license": "MIT",
